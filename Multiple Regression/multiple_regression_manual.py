@@ -33,7 +33,7 @@ def multiple_regression_delta_0_loss_ratio(x, y, number_of_iters=1000000, thresh
         losses.append(loss(y,predictions)//1)
 
     return theta,losses
-def multiple_regression_delta_0(x, y, number_of_iters=1000000, threshold=320, stepsize=0.000003):
+def multiple_regression_delta_0(x, y, number_of_iters=1000000, threshold=320, stepsize=0.00003):
     theta = initialize_theta(x)
 
     losses = []
@@ -43,13 +43,11 @@ def multiple_regression_delta_0(x, y, number_of_iters=1000000, threshold=320, st
     start_time = time.time()
     while time.time() - start_time < threshold:
         predictions = predict(x_with_bias,theta)
-        gradient = -2 * np.dot(x_with_bias.T, (y - predictions))
+        gradient = np.dot(x_with_bias.T, (y - predictions)) + theta*column_squares
         gradient = gradient / column_squares
-
-        loss_ratio = loss(y,predictions) / loss(y,predict(x_with_bias,-gradient))
         if(np.sum(np.abs(theta * (1 - stepsize) - gradient * stepsize -theta))<0.000001):
             break
-        theta = theta * (1 - stepsize) - gradient * stepsize
+        theta = theta * (1 - stepsize) + gradient * stepsize
         losses.append(loss(y,predictions)//1)
 
     return theta,losses
@@ -103,7 +101,7 @@ x = df[df.columns[:-1]]
 # Time the model training
 
 start_time = time.time()
-
+'''
 model,losses = multiple_regression_gradient_descent(x, y)
 
 end_time = time.time()
@@ -127,7 +125,7 @@ plt.ylabel('Loss Değeri')
 plt.title('Gradient Descent İterasyonlarındaki Loss Değerleri')
 plt.grid(True)
 plt.show()
-
+'''
 # Time the model training
 start_time = time.time()
 
