@@ -103,7 +103,6 @@ print(elapsed_time)
 # Predict values and calculate loss
 x_with_bias = np.c_[np.ones(x.shape[0]), x]  # Adding bias term to x for prediction
 predictions = predict(x_with_bias, model)
-loss = np.sum((y - predictions) ** 2)
 
 with open("output.txt", "w") as file:
     file.write(f'Model Parameters: {model}\n')
