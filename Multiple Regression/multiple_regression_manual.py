@@ -16,8 +16,7 @@ def predict(x, theta):
 
 def loss(y,predictions):
     return np.sum((y - predictions) ** 2)
-
-def multiple_regression_delta_0(x, y, number_of_iters=1000000, threshold=160, stepsize=0.0003):
+def multiple_regression_delta_0_loss_ratio(x, y, number_of_iters=1000000, threshold=320, stepsize=0.000003):
     theta = initialize_theta(x)
 
     losses = []
@@ -29,11 +28,25 @@ def multiple_regression_delta_0(x, y, number_of_iters=1000000, threshold=160, st
         predictions = predict(x_with_bias,theta)
         gradient = -2 * np.dot(x_with_bias.T, (y - predictions))
         gradient = gradient / column_squares
-        if(random.random()<0.0001):
-            print(f"THETA: {theta}")
-            print(f"Gradient: {-gradient}")
-            print(f"Sum: {theta * (1 - stepsize) - gradient * stepsize}")
-            print(f"LOSS: {loss(y,predictions)}")
+        loss_ratio = loss(y,predictions) / loss(y,predict(x_with_bias,-gradient))
+        theta = theta * (1 /(1 + loss_ratio)) - gradient * stepsize * (loss_ratio / (loss_ratio + 1))
+        losses.append(loss(y,predictions)//1)
+
+    return theta,losses
+def multiple_regression_delta_0(x, y, number_of_iters=1000000, threshold=320, stepsize=0.000003):
+    theta = initialize_theta(x)
+
+    losses = []
+    x_with_bias = np.c_[np.ones(x.shape[0]), x]
+    n = len(y)
+    column_squares = np.sum(x_with_bias**2, axis=0)
+    start_time = time.time()
+    while time.time() - start_time < threshold:
+        predictions = predict(x_with_bias,theta)
+        gradient = -2 * np.dot(x_with_bias.T, (y - predictions))
+        gradient = gradient / column_squares
+
+        loss_ratio = loss(y,predictions) / loss(y,predict(x_with_bias,-gradient))
         if(np.sum(np.abs(theta * (1 - stepsize) - gradient * stepsize -theta))<0.000001):
             break
         theta = theta * (1 - stepsize) - gradient * stepsize
@@ -60,12 +73,8 @@ def multiple_regression_gradient_descent(x, y, number_of_iters=1000000, threshol
         # Update theta using gradient and step size
         theta_new = theta - stepsize * gradient
 
-        if(random.random()<0.0001):
-            print(f"THETA: {theta}")
-            print(f"Gradient: {-gradient}")
-            print(f"Sum: {theta_new - theta}")
-            print(f"LOSS: {loss(y, predictions)}")
-        if(loss(y, predictions) < 30000):
+        # Exit on convergence
+        if(np.sum(np.abs(theta_new - theta)) < 0.000001):
             break
 
         losses.append(loss(y,predictions)//1)
@@ -137,13 +146,6 @@ with open("output_delta_0.txt", "w") as file:
 print(elapsed_time)
 print("Results written to output.txt")
 plt.figure(figsize=(10, 6))
-'''plt.scatter(y, predictions, color='blue', alpha=0.5)
-plt.subplot([y.min(), y.max()], [y.min(), y.max()], color='red', linestyle='--', linewidth=2)
-plt.xlabel('True Values')
-plt.ylabel('Predicted Values')
-plt.title('True Values vs. Predicted Values')
-plt.grid()
-'''
 plt.plot(losses[-100:], marker='o')
 plt.xlabel('İterasyon')
 plt.ylabel('Loss Değeri')
